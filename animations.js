@@ -151,3 +151,4 @@ setTimeout(() => {
 
 console.log('🎨 Decyphers v3 — REAL prices, no blocking!');
 })();
+// Force redeploy Fri Mar 27 19:56:14 +08 2026
