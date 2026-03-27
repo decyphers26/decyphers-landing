@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decyphers — AI Chart Analysis That Shows Its Work</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1d1d1f;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo span {
+            color: #0071e3;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0071e3;
+        }
+
+        .nav-cta {
+            background: #0071e3;
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s !important;
+        }
+
+        .nav-cta:hover {
+            background: #0077ed;
+            transform: scale(1.05);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 20px 80px;
+            background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(80px);
+        }
+
+        .hero-bg-circle:nth-child(1) {
+            width: 600px;
+            height: 600px;
+            background: #e8f4ff;
+            top: -200px;
+            right: -100px;
+        }
+
+        .hero-bg-circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: #f0e8ff;
+            bottom: -100px;
+            left: -100px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: #e8f4ff;
+            color: #0071e3;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
+            color: #1d1d1f;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #0071e3, #5856d6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: #6e6e73;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0071e3;
+            color: white;
+            padding: 16px 36px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hero-cta:hover {
+            background: #0077ed;
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0, 113, 227, 0.3);
+        }
+
+        .hero-cta-secondary {
+            background: transparent;
+            color: #0071e3;
+            border: 2px solid #0071e3;
+            margin-left: 12px;
+        }
+
+        .hero-cta-secondary:hover {
+            background: #0071e3;
+            color: white;
+        }
+
+        /* Product Mockup */
+        .product-mockup {
+            max-width: 900px;
+            margin: 60px auto 0;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .mockup-window {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .mockup-header {
+            background: #f5f5f7;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mockup-dot.red { background: #ff5f57; }
+        .mockup-dot.yellow { background: #febc2e; }
+        .mockup-dot.green { background: #28c840; }
+
+        .mockup-body {
+            padding: 30px;
+            min-height: 350px;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .mockup-chart {
+            width: 100%;
+            height: 280px;
+            position: relative;
+        }
+
+        .mockup-annotation {
+            position: absolute;
+            background: rgba(0, 113, 227, 0.1);
+            border: 1px solid rgba(0, 113, 227, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: #0071e3;
+            font-weight: 600;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .mockup-annotation:nth-child(1) { top: 20px; right: 20px; animation-delay: 0.5s; }
+        .mockup-annotation:nth-child(2) { bottom: 60px; left: 20px; animation-delay: 1s; }
+        .mockup-annotation:nth-child(3) { top: 80px; left: 40%; animation-delay: 1.5s; }
+
+        .mockup-sidebar {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 220px;
+        }
+
+        .sidebar-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .sidebar-item:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-label { color: #6e6e73; }
+        .sidebar-value { color: #1d1d1f; font-weight: 600; }
+        .sidebar-value.green { color: #34c759; }
+
+        /* Section Styles */
+        .section {
+            padding: 120px 20px;
+        }
+
+        .section-light {
+            background: #ffffff;
+        }
+
+        .section-gray {
+            background: #f5f5f7;
+        }
+
+        .section-dark {
+            background: #1d1d1f;
+            color: #ffffff;
+        }
+
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0071e3;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            color: #1d1d1f;
+        }
+
+        .section-dark .section-title {
+            color: #ffffff;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.15rem;
+            color: #6e6e73;
+            max-width: 550px;
+            margin: 0 auto 60px;
+            line-height: 1.6;
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid #e8e8ed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border-color: transparent;
+        }
+
+        .feature-card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card:nth-child(1) .feature-card-icon { background: #e8f4ff; }
+        .feature-card:nth-child(2) .feature-card-icon { background: #fff3e8; }
+        .feature-card:nth-child(3) .feature-card-icon { background: #e8ffe8; }
+        .feature-card:nth-child(4) .feature-card-icon { background: #f3e8ff; }
+        .feature-card:nth-child(5) .feature-card-icon { background: #ffe8f0; }
+        .feature-card:nth-child(6) .feature-card-icon { background: #e8ffff; }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #6e6e73;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Before/After Split */
+        .ba-section {
+            padding: 120px 20px;
+            background: #f5f5f7;
+        }
+
+        .ba-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .ba-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .ba-side {
+            padding: 50px 40px;
+        }
+
+        .ba-before {
+            background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+        }
+
+        .ba-after {
+            background: linear-gradient(135deg, #f0fff4, #e8ffe8);
+        }
+
+        .ba-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .ba-before .ba-label {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .ba-after .ba-label {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .ba-side h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+
+        .ba-list {
+            list-style: none;
+        }
+
+        .ba-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+            color: #424242;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .ba-list li:last-child {
+            border-bottom: none;
+        }
+
+        .ba-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Animated Counter Section */
+        .counter-section {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, #0071e3, #5856d6);
+            text-align: center;
+        }
+
+        .counter-section .section-title,
+        .counter-section .section-subtitle {
+            color: #ffffff;
+        }
+
+        .counter-section .section-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .counter-big {
+            font-size: clamp(5rem, 12vw, 8rem);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -3px;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .counter-label {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .counter-sub {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .counter-stat {
+            text-align: center;
+        }
+
+        .counter-stat-num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: block;
+        }
+
+        .counter-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Trust Bar */
+        .trust-bar {
+            padding: 40px 20px;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ed;
+            border-bottom: 1px solid #e8e8ed;
+        }
+
+        .trust-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .trust-label {
+            font-size: 0.85rem;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .trust-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .trust-logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #d1d1d6;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+
+        .trust-logo:hover {
+            color: #86868b;
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px 32px;
+            border: 1px solid #e8e8ed;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .pricing-card.featured {
+            background: linear-gradient(135deg, #0071e3, #5856d6);
+            color: #ffffff;
+            border: none;
+            transform: scale(1.05);
+            box-shadow: 0 30px 60px rgba(0, 113, 227, 0.3);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.08);
+        }
+
+        .pricing-popular {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff9500;
+            color: #ffffff;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pricing-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .pricing-card.featured .pricing-name {
+            color: #ffffff;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+        }
+
+        .pricing-card.featured .pricing-price {
+            color: #ffffff;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6e6e73;
+        }
+
+        .pricing-card.featured .pricing-price span {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pricing-desc {
+            font-size: 0.9rem;
+            color: #6e6e73;
+            margin-bottom: 30px;
+        }
+
+        .pricing-card.featured .pricing-desc {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #424242;
+        }
+
+        .pricing-card.featured .pricing-features li {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .pricing-check {
+            color: #34c759;
+            font-weight: bold;
+        }
+
+        .pricing-card.featured .pricing-check {
+            color: #ffffff;
+        }
+
+        .pricing-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid #e8e8ed;
+            color: #1d1d1f;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .pricing-btn:hover {
+            background: #f5f5f7;
+        }
+
+        .pricing-card.featured .pricing-btn {
+            background: #ffffff;
+            color: #0071e3;
+            border-color: #ffffff;
+        }
+
+        .pricing-card.featured .pricing-btn:hover {
+            background: #f0f0f0;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 120px 20px;
+            background: #f5f5f7;
+            text-align: center;
+        }
+
+        .final-cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .final-cta p {
+            font-size: 1.15rem;
+            color: #6e6e73;
+            margin-bottom: 40px;
+        }
+
+        .final-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0071e3;
+            color: white;
+            padding: 18px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 1.15rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .final-cta-btn:hover {
+            background: #0077ed;
+            transform: scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 113, 227, 0.3);
+        }
+
+        .final-cta-note {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #86868b;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 50px 20px 30px;
+            background: #f5f5f7;
+            border-top: 1px solid #e8e8ed;
+        }
+
+        .footer-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand p {
+            color: #6e6e73;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .footer-col h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-col a {
+            display: block;
+            color: #6e6e73;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 4px 0;
+            transition: color 0.3s;
+        }
+
+        .footer-col a:hover {
+            color: #0071e3;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #e8e8ed;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-bottom p {
+            color: #86868b;
+            font-size: 0.8rem;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .nav { padding: 12px 20px; }
+            .nav-links { display: none; }
+
+            .features-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ba-split {
+                grid-template-columns: 1fr;
+            }
+
+            .counter-sub {
+                gap: 30px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .pricing-card.featured:hover {
+                transform: scale(1.02);
+            }
+
+            .mockup-sidebar {
+                display: none;
+            }
+        }
+
+        /* Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">Decyphers<span>.</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+            <a href="#cta" class="nav-cta">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg-circle"></div>
+        <div class="hero-bg-circle"></div>
+
+        <div class="hero-content">
+            <div class="hero-badge">✨ Now with 87% verified accuracy</div>
+            <h1>Chart Analysis<br>That <span>Shows Its Work</span></h1>
+            <p class="hero-sub">Decyphers AI analyzes your charts in 30 seconds — and explains exactly why, with visual annotations you can see and learn from.</p>
+            <div>
+                <a href="#cta" class="hero-cta">Try Free →</a>
+                <a href="#demo" class="hero-cta hero-cta-secondary">See Demo</a>
+            </div>
+
+            <!-- Product Mockup -->
+            <div class="product-mockup">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <div class="mockup-dot red"></div>
+                        <div class="mockup-dot yellow"></div>
+                        <div class="mockup-dot green"></div>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-chart">
+                            <!-- SVG Chart -->
+                            <svg viewBox="0 0 800 250" style="width:100%;height:100%;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Grid lines -->
+                                <line x1="50" y1="30" x2="750" y2="30" stroke="#e8e8ed" stroke-width="1"/>
+                                <line x1="50" y1="80" x2="750" y2="80" stroke="#e8e8ed" stroke-width="1"/>
+                                <line x1="50" y1="130" x2="750" y2="130" stroke="#e8e8ed" stroke-width="1"/>
+                                <line x1="50" y1="180" x2="750" y2="180" stroke="#e8e8ed" stroke-width="1"/>
+                                <line x1="50" y1="230" x2="750" y2="230" stroke="#e8e8ed" stroke-width="1"/>
+                                
+                                <!-- Candlestick-like pattern -->
+                                <rect x="80" y="120" width="15" height="40" rx="2" fill="#34c759"/>
+                                <rect x="120" y="100" width="15" height="35" rx="2" fill="#34c759"/>
+                                <rect x="160" y="130" width="15" height="30" rx="2" fill="#ff3b30"/>
+                                <rect x="200" y="110" width="15" height="40" rx="2" fill="#34c759"/>
+                                <rect x="240" y="90" width="15" height="45" rx="2" fill="#34c759"/>
+                                <rect x="280" y="100" width="15" height="35" rx="2" fill="#ff3b30"/>
+                                <rect x="320" y="120" width="15" height="50" rx="2" fill="#ff3b30"/>
+                                <rect x="360" y="140" width="15" height="30" rx="2" fill="#34c759"/>
+                                <rect x="400" y="120" width="15" height="40" rx="2" fill="#34c759"/>
+                                <rect x="440" y="90" width="15" height="50" rx="2" fill="#34c759"/>
+                                <rect x="480" y="70" width="15" height="45" rx="2" fill="#34c759"/>
+                                <rect x="520" y="85" width="15" height="30" rx="2" fill="#ff3b30"/>
+                                <rect x="560" y="60" width="15" height="55" rx="2" fill="#34c759"/>
+                                <rect x="600" y="45" width="15" height="40" rx="2" fill="#34c759"/>
+                                <rect x="640" y="55" width="15" height="35" rx="2" fill="#ff3b30"/>
+                                <rect x="680" y="40" width="15" height="45" rx="2" fill="#34c759"/>
+                                
+                                <!-- Support line -->
+                                <line x1="50" y1="180" x2="750" y2="180" stroke="#0071e3" stroke-width="2" stroke-dasharray="8,4"/>
+                                <text x="760" y="185" fill="#0071e3" font-size="11" font-weight="600">SUPPORT</text>
+                                
+                                <!-- Trend line -->
+                                <line x1="80" y1="160" x2="680" y2="60" stroke="#34c759" stroke-width="2"/>
+                                
+                                <!-- Annotation boxes -->
+                                <rect x="580" y="100" width="120" height="35" rx="6" fill="rgba(0,113,227,0.1)" stroke="#0071e3" stroke-width="1"/>
+                                <text x="640" y="122" text-anchor="middle" fill="#0071e3" font-size="10" font-weight="600">RSI: 62 (Bullish)</text>
+                            </svg>
+
+                            <!-- Floating Annotations -->
+                            <div class="mockup-annotation" style="top:10px;right:10px;opacity:1;">
+                                📈 Bullish Trend
+                            </div>
+                            <div class="mockup-annotation" style="bottom:40px;left:10px;opacity:1;">
+                                🟢 Strong Support
+                            </div>
+                            <div class="mockup-annotation" style="top:60px;left:35%;opacity:1;">
+                                🎯 Entry Zone
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="mockup-sidebar">
+                            <div class="sidebar-title">Analysis Results</div>
+                            <div class="sidebar-item">
+                                <span class="sidebar-label">Trend</span>
+                                <span class="sidebar-value green">Bullish</span>
+                            </div>
+                            <div class="sidebar-item">
+                                <span class="sidebar-label">RSI</span>
+                                <span class="sidebar-value">62</span>
+                            </div>
+                            <div class="sidebar-item">
+                                <span class="sidebar-label">Support</span>
+                                <span class="sidebar-value">1.0850</span>
+                            </div>
+                            <div class="sidebar-item">
+                                <span class="sidebar-label">Resistance</span>
+                                <span class="sidebar-value">1.1020</span>
+                            </div>
+                            <div class="sidebar-item">
+                                <span class="sidebar-label">Confidence</span>
+                                <span class="sidebar-value green">87%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Bar -->
+    <div class="trust-bar">
+        <div class="trust-container">
+            <div class="trust-label">As featured in</div>
+            <div class="trust-logos">
+                <span class="trust-logo">Bloomberg</span>
+                <span class="trust-logo">Reuters</span>
+                <span class="trust-logo">Forbes</span>
+                <span class="trust-logo">TechCrunch</span>
+                <span class="trust-logo">Business Insider</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="section section-light" id="features">
+        <div class="section-container">
+            <div class="section-eyebrow">Features</div>
+            <h2 class="section-title">See Decyphers in Action</h2>
+            <p class="section-subtitle">Everything you need to trade with clarity. Nothing you don't.</p>
+
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">📊</div>
+                    <h3>Visual Annotations</h3>
+                    <p>Every support level, resistance zone, and pattern marked directly on your chart.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">⚡</div>
+                    <h3>30-Second Analysis</h3>
+                    <p>Upload any chart screenshot. Get a complete breakdown in under 30 seconds.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">🔍</div>
+                    <h3>Full Transparency</h3>
+                    <p>See the exact indicators, patterns, and logic behind every signal. No black boxes.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">🎓</div>
+                    <h3>Learn While Trading</h3>
+                    <p>Every analysis teaches you something new. Get better at trading with each use.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">🌐</div>
+                    <h3>All Markets</h3>
+                    <p>Forex, crypto, stocks, indices. Works with any chart from any platform.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon">📈</div>
+                    <h3>Verified Results</h3>
+                    <p>87% accuracy tracked and verified. We publish our stats because we're proud of them.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Before/After -->
+    <section class="ba-section">
+        <div class="ba-container">
+            <div class="section-eyebrow">Comparison</div>
+            <h2 class="section-title">The Difference Is Clear</h2>
+            <p class="section-subtitle">See what changes when you switch from manual analysis to Decyphers AI.</p>
+
+            <div class="ba-split animate-on-scroll">
+                <div class="ba-side ba-before">
+                    <div class="ba-label">❌ Before Decyphers</div>
+                    <h3>Manual Analysis</h3>
+                    <ul class="ba-list">
+                        <li><span class="ba-icon">⏱️</span> 2-3 hours per chart</li>
+                        <li><span class="ba-icon">😰</span> Second-guessing every decision</li>
+                        <li><span class="ba-icon">❓</span> Missing key levels</li>
+                        <li><span class="ba-icon">📉</span> 45% average win rate</li>
+                        <li><span class="ba-icon">😤</span> Emotional trading</li>
+                        <li><span class="ba-icon">🚫</span> No learning progress</li>
+                    </ul>
+                </div>
+                <div class="ba-side ba-after">
+                    <div class="ba-label">✅ After Decyphers</div>
+                    <h3>AI Analysis</h3>
+                    <ul class="ba-list">
+                        <li><span class="ba-icon">⚡</span> 30 seconds per chart</li>
+                        <li><span class="ba-icon">🧠</span> Confident, informed decisions</li>
+                        <li><span class="ba-icon">🎯</span> Every level identified</li>
+                        <li><span class="ba-icon">📈</span> 87% verified accuracy</li>
+                        <li><span class="ba-icon">😌</span> Systematic approach</li>
+                        <li><span class="ba-icon">📚</span> Continuous improvement</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Animated Counter -->
+    <section class="counter-section">
+        <div class="section-container">
+            <div class="section-eyebrow" style="color:rgba(255,255,255,0.7);">Accuracy</div>
+            <h2 class="section-title">Proven Performance</h2>
+            <p class="section-subtitle">Not estimated. Not claimed. Verified.</p>
+
+            <div class="counter-big"><span id="accuracyCounter">0</span>%</div>
+            <div class="counter-label">Verified accuracy across 10,000+ analyzed charts</div>
+
+            <div class="counter-sub">
+                <div class="counter-stat">
+                    <span class="counter-stat-num" id="chartsCounter">0</span>
+                    <span class="counter-stat-label">Charts Analyzed</span>
+                </div>
+                <div class="counter-stat">
+                    <span class="counter-stat-num" id="usersCounter">0</span>
+                    <span class="counter-stat-label">Active Traders</span>
+                </div>
+                <div class="counter-stat">
+                    <span class="counter-stat-num">&lt;30s</span>
+                    <span class="counter-stat-label">Average Analysis Time</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Metrics -->
+    <section style="padding:30px 20px; background:linear-gradient(135deg,#f0f9ff,#e0f2fe);" class="reveal">
+        <div style="max-width:800px; margin:0 auto;">
+            <h2 style="text-align:center; font-size:2rem; margin-bottom:20px; color:#0c4a6e;">📊 By The Numbers</h2>
+            <div style="display:grid; gap:16px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#16a34a; font-size:1.2rem;">87%</div><div style="font-size:0.75rem; color:#64748b;">Accuracy</div></div>
+                    <div style="flex:1; background:#dcfce7; border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="87%" style="background:linear-gradient(90deg,#16a34a,#4ade80); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#2563eb; font-size:1.2rem;">30s</div><div style="font-size:0.75rem; color:#64748b;">Speed</div></div>
+                    <div style="flex:1; background:#dbeafe; border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="95%" style="background:linear-gradient(90deg,#2563eb,#60a5fa); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#9333ea; font-size:1.2rem;">12+</div><div style="font-size:0.75rem; color:#64748b;">Markets</div></div>
+                    <div style="flex:1; background:#f3e8ff; border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="100%" style="background:linear-gradient(90deg,#9333ea,#c084fc); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#ea580c; font-size:1.2rem;">99.9%</div><div style="font-size:0.75rem; color:#64748b;">Uptime</div></div>
+                    <div style="flex:1; background:#ffedd5; border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="99.9%" style="background:linear-gradient(90deg,#ea580c,#fb923c); border-radius:10px; height:100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+            <!-- Feature Hexagons -->
+            <div class="reveal" style="margin-top:30px;">
+                <h3 style="text-align:center; font-size:1.3rem; color:#1e40af; margin-bottom:16px;">⬡ 9 Power Features</h3>
+                <div class="hex-grid">
+                    <div class="hex" style="background:linear-gradient(135deg,#1e40af,#3b82f6);"><div class="hex-icon">📊</div><div class="hex-title">Chart Analysis</div><div class="hex-sub">30 seconds</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#065f46,#22c55e);"><div class="hex-icon">🎯</div><div class="hex-title">87% Accurate</div><div class="hex-sub">Verified stats</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#7c2d12,#f97316);"><div class="hex-icon">👁️</div><div class="hex-title">Transparent</div><div class="hex-sub">Show your work</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#581c87,#a855f7);"><div class="hex-icon">⚡</div><div class="hex-title">Instant</div><div class="hex-sub">Real-time results</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#1e3a5f,#06b6d4);"><div class="hex-icon">🌍</div><div class="hex-title">Multi-Market</div><div class="hex-sub">Forex, stocks, crypto</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#7f1d1d,#ef4444);"><div class="hex-icon">🔔</div><div class="hex-title">24/7 Alerts</div><div class="hex-sub">Never miss a trade</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#365314,#84cc16);"><div class="hex-icon">🎓</div><div class="hex-title">Learn</div><div class="hex-sub">Education built-in</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#134e4a,#2dd4bf);"><div class="hex-icon">🛡️</div><div class="hex-title">Risk Control</div><div class="hex-sub">Auto stop-loss</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6);"><div class="hex-icon">🤖</div><div class="hex-title">AI Engine</div><div class="hex-sub">Vision-to-Code</div></div>
+                </div>
+            </div>
+    <!-- Pricing -->
+    <section class="section section-light" id="pricing">
+        <div class="section-container">
+            <div class="section-eyebrow">Pricing</div>
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">No hidden fees. No surprises. Cancel anytime.</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card animate-on-scroll">
+                    <div class="pricing-name">Starter</div>
+                    <div class="pricing-price">$29<span>/mo</span></div>
+                    <div class="pricing-desc">Perfect for trying Decyphers</div>
+                    <ul class="pricing-features">
+                        <li><span class="pricing-check">✓</span> 50 analyses/month</li>
+                        <li><span class="pricing-check">✓</span> Basic annotations</li>
+                        <li><span class="pricing-check">✓</span> All markets</li>
+                        <li><span class="pricing-check">✓</span> Email support</li>
+                    </ul>
+                    <button class="pricing-btn">Get Started</button>
+                </div>
+
+                <div class="pricing-card featured animate-on-scroll">
+                    <div class="pricing-popular">Most Popular</div>
+                    <div class="pricing-name">Professional</div>
+                    <div class="pricing-price">$49<span>/mo</span></div>
+                    <div class="pricing-desc">For serious traders</div>
+                    <ul class="pricing-features">
+                        <li><span class="pricing-check">✓</span> Unlimited analyses</li>
+                        <li><span class="pricing-check">✓</span> Advanced annotations</li>
+                        <li><span class="pricing-check">✓</span> Priority processing</li>
+                        <li><span class="pricing-check">✓</span> API access</li>
+                        <li><span class="pricing-check">✓</span> Priority support</li>
+                    </ul>
+                    <button class="pricing-btn">Get Started</button>
+                </div>
+
+                <div class="pricing-card animate-on-scroll">
+                    <div class="pricing-name">Team</div>
+                    <div class="pricing-price">$149<span>/mo</span></div>
+                    <div class="pricing-desc">For trading teams & firms</div>
+                    <ul class="pricing-features">
+                        <li><span class="pricing-check">✓</span> Everything in Pro</li>
+                        <li><span class="pricing-check">✓</span> 5 team members</li>
+                        <li><span class="pricing-check">✓</span> Shared workspace</li>
+                        <li><span class="pricing-check">✓</span> Custom integrations</li>
+                        <li><span class="pricing-check">✓</span> Dedicated support</li>
+                    </ul>
+                    <button class="pricing-btn">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section-gray" id="faq">
+        <div class="section-container">
+            <div class="section-eyebrow">FAQ</div>
+            <h2 class="section-title">Common Questions</h2>
+            <p class="section-subtitle">Everything you need to know.</p>
+
+            <div style="max-width:700px;margin:0 auto;">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How does Decyphers compare to GPTChart?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            GPTChart gives you signals. We give you understanding. Every Decyphers analysis includes visual annotations showing exactly which indicators triggered the signal and why. You learn while you trade.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What chart platforms work with Decyphers?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Any platform. TradingView, MT4, MT5, Binance, Coinbase — if it has a chart, we can analyze it. Just take a screenshot and upload. No integrations needed.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Can beginners use Decyphers?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes. In fact, beginners benefit most. Because we explain our reasoning in plain English, every analysis is a free trading lesson. Many of our most successful users started as complete beginners.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What's your refund policy?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            30-day money-back guarantee. No questions asked. If you don't see improvement, we refund every cent. We're confident in our product.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="cta">
+        <div class="final-cta-content">
+            <div class="section-eyebrow">Get Started</div>
+            <h2>See Your Charts Clearly</h2>
+            <p>Join thousands of traders who finally understand what their charts are telling them.</p>
+            <button class="final-cta-btn">
+                Start Free Trial →
+            </button>
+            <p class="final-cta-note">14-day free trial • No credit card required • Cancel anytime</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="nav-logo">Decyphers<span>.</span></div>
+                    <p>AI chart analysis that shows its work. Trade with clarity, not guesswork.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#">Features</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">API</a>
+                    <a href="#">Integrations</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="#">About</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Security</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 Decyphers AI. All rights reserved.</p>
+                <p>Trading involves risk. Past performance doesn't guarantee future results.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        function toggleFaq(btn) {
+            const item = btn.parentElement;
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            if (!isActive) item.classList.add('active');
+        }
+
+        // Counter Animation
+        function animateCounter(element, target, duration) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= target) {
+                    element.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start);
+                }
+            }, 16);
+        }
+
+        // Scroll animations
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Counter observer
+        function initCounters() {
+            const counterSection = document.querySelector('.counter-section');
+            let animated = false;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !animated) {
+                        animated = true;
+                        animateCounter(document.getElementById('accuracyCounter'), 87, 2000);
+                        animateCounter(document.getElementById('chartsCounter'), 10000, 2500);
+                        animateCounter(document.getElementById('usersCounter'), 3400, 2000);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            observer.observe(counterSection);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initScrollAnimations();
+            initCounters();
+        });
+    </script>
+<script src="animations.js"></script>
+</body>
+</html>

@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decyphers — The Chart That Finally Talked Back</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.7), 0 0 60px rgba(16, 185, 129, 0.3); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Story Sections */
+        .story-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-content {
+            max-width: 800px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .story-text {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            line-height: 1.8;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .story-text strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .story-text em {
+            color: #fca5a5;
+            font-style: italic;
+        }
+
+        .story-text .highlight {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .story-text-small {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+
+        /* Opening Scene */
+        .opening {
+            background: linear-gradient(180deg, #050508 0%, #0a0a12 50%, #0f0a0a 100%);
+            min-height: 100vh;
+        }
+
+        .opening::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.05) 0%, transparent 70%);
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        .time-stamp {
+            font-size: clamp(4rem, 10vw, 8rem);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .scene-indicator {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .scene-emoji {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* The Low Point */
+        .low-point {
+            background: linear-gradient(180deg, #0f0a0a 0%, #1a0808 50%, #1f0a0a 100%);
+        }
+
+        .low-point::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center bottom, rgba(239, 68, 68, 0.1) 0%, transparent 60%);
+        }
+
+        .account-balance {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #ef4444;
+            text-align: center;
+            margin: 30px 0;
+            text-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+        }
+
+        /* The Discovery */
+        .discovery {
+            background: linear-gradient(180deg, #1f0a0a 0%, #1a0a1f 50%, #150a2e 100%);
+        }
+
+        .discovery::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+        }
+
+        /* The Reveal */
+        .reveal {
+            background: linear-gradient(180deg, #150a2e 0%, #0a1a2e 50%, #0a2e1a 100%);
+        }
+
+        .reveal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+        }
+
+        /* The Payoff */
+        .payoff {
+            background: linear-gradient(180deg, #0a2e1a 0%, #0a1f15 50%, #0a1a0f 100%);
+        }
+
+        .payoff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.1) 0%, transparent 60%);
+        }
+
+        .profit-number {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #10b981;
+            text-align: center;
+            margin: 30px 0;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Timeline Visual */
+        .timeline-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+
+        .timeline-dot.red { background: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+        .timeline-dot.orange { background: #f97316; box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
+        .timeline-dot.purple { background: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+        .timeline-dot.blue { background: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .timeline-dot.green { background: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+
+        .timeline-line {
+            height: 3px;
+            flex: 1;
+            min-width: 40px;
+            background: linear-gradient(90deg, #ef4444, #f97316, #8b5cf6, #3b82f6, #10b981);
+        }
+
+        .timeline-label {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        /* Social Proof Grid */
+        .social-section {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, #0a1a0f 0%, #0a0f1a 100%);
+        }
+
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #9ca3af;
+            max-width: 600px;
+            margin: 0 auto 50px;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .social-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .social-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .social-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .social-info h4 {
+            font-size: 0.95rem;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .social-info p {
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .social-result {
+            margin-left: auto;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        /* Founder Pricing */
+        .pricing-section {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, #0a0f1a 0%, #0a0a0f 100%);
+        }
+
+        .pricing-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .founder-badge {
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 6px 40px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transform: rotate(45deg);
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .pricing-original {
+            font-size: 1.3rem;
+            color: #6b7280;
+            text-decoration: line-through;
+            margin-bottom: 5px;
+        }
+
+        .pricing-current {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #10b981;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .pricing-current span {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+
+        .pricing-period {
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #d1d5db;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-check {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .pricing-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 18px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .pricing-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .pricing-scarcity {
+            margin-top: 20px;
+            color: #fca5a5;
+            font-size: 0.95rem;
+        }
+
+        .pricing-scarcity strong {
+            color: #ef4444;
+        }
+
+        /* Guarantee */
+        .guarantee-section {
+            padding: 80px 20px;
+            background: linear-gradient(180deg, #0a0a0f 0%, #0f0a15 100%);
+        }
+
+        .guarantee-box {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .guarantee-shield {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .guarantee-box h2 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .guarantee-box p {
+            font-size: 1.15rem;
+            color: #9ca3af;
+            line-height: 1.7;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 120px 20px;
+            background: linear-gradient(180deg, #0f0a15 0%, #0a0a0f 100%);
+            text-align: center;
+            position: relative;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .final-cta-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .final-cta p {
+            font-size: 1.2rem;
+            color: #9ca3af;
+            margin-bottom: 40px;
+        }
+
+        .final-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            padding: 20px 50px;
+            border-radius: 60px;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 800;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .final-cta-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 20px;
+            background: #050508;
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #6b7280;
+            text-decoration: none;
+        }
+
+        /* SVG Elements */
+        .story-svg {
+            position: absolute;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .story-section {
+                padding: 80px 20px;
+            }
+
+            .social-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-visual {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .timeline-line {
+                min-width: 20px;
+            }
+
+            .pricing-card {
+                padding: 40px 25px;
+            }
+
+            .time-stamp {
+                font-size: 4rem;
+            }
+        }
+
+        /* Scroll animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .animate-delay-1 { transition-delay: 0.1s; }
+        .animate-delay-2 { transition-delay: 0.2s; }
+        .animate-delay-3 { transition-delay: 0.3s; }
+        .animate-delay-4 { transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+    <!-- Opening Scene: 2 AM -->
+    <section class="story-section opening">
+        <div class="time-stamp">2:00 AM</div>
+        
+        <svg class="story-svg" style="left:5%;top:20%;width:200px;" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="90" stroke="#ef4444" stroke-width="2" opacity="0.3"/>
+            <circle cx="100" cy="100" r="60" stroke="#ef4444" stroke-width="1" opacity="0.2"/>
+            <path d="M100 40 L100 100 L150 100" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <svg class="story-svg" style="right:8%;bottom:25%;width:180px;" viewBox="0 0 180 180" fill="none">
+            <rect x="20" y="100" width="20" height="60" rx="3" fill="#ef4444" opacity="0.3"/>
+            <rect x="50" y="80" width="20" height="80" rx="3" fill="#ef4444" opacity="0.4"/>
+            <rect x="80" y="60" width="20" height="100" rx="3" fill="#ef4444" opacity="0.3"/>
+            <rect x="110" y="90" width="20" height="70" rx="3" fill="#ef4444" opacity="0.4"/>
+            <rect x="140" y="110" width="20" height="50" rx="3" fill="#ef4444" opacity="0.3"/>
+        </svg>
+
+        <div class="story-content animate-on-scroll">
+            <span class="scene-indicator">Chapter 1</span>
+            <span class="scene-emoji">🌃</span>
+            <p class="story-text">
+                It's <strong>2 AM</strong>.<br><br>
+                You're staring at a chart. The blue light burns your retinas.<br><br>
+                Your hands are <em>shaking</em>.<br><br>
+                Coffee's gone cold. Three hours ago it was hot. Three hours ago you thought you had it figured out.<br><br>
+                The <strong>EUR/USD</strong> just did something you didn't expect. Again.<br><br>
+                And now there's <strong>$3,200</strong> less in your account than there was this morning.
+            </p>
+        </div>
+    </section>
+
+    <!-- The Low Point -->
+    <section class="story-section low-point">
+        <svg class="story-svg" style="left:50%;top:10%;width:300px;transform:translateX(-50%);" viewBox="0 0 300 100" fill="none">
+            <path d="M10 80 Q75 20 150 60 Q225 100 290 30" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="290" cy="30" r="6" fill="#ef4444"/>
+        </svg>
+
+        <div class="story-content animate-on-scroll">
+            <span class="scene-indicator">Chapter 2 — The Bottom</span>
+            <span class="scene-emoji">📉</span>
+
+            <!-- Timeline Visual -->
+            <div class="timeline-visual">
+                <div style="text-align:center;">
+                    <div class="timeline-dot red"></div>
+                    <div class="timeline-label">$10,000</div>
+                </div>
+                <div class="timeline-line"></div>
+                <div style="text-align:center;">
+                    <div class="timeline-dot orange"></div>
+                    <div class="timeline-label">$6,200</div>
+                </div>
+                <div class="timeline-line"></div>
+                <div style="text-align:center;">
+                    <div class="timeline-dot red"></div>
+                    <div class="timeline-label" style="color:#ef4444;font-weight:bold;">$347</div>
+                </div>
+            </div>
+
+            <p class="story-text" style="margin-top:50px;">
+                This isn't your first rodeo.<br><br>
+                You started with <strong>$10,000</strong>. Six months ago. Feeling confident.<br><br>
+                YouTube told you it was easy. The guru with the Lambo said just follow the signals.<br><br>
+                So you followed. And followed. And followed.<br><br>
+                Until you looked at your balance and saw...
+            </p>
+
+            <div class="account-balance animate-on-scroll animate-delay-2">$347.12</div>
+
+            <p class="story-text story-text-small" style="margin-top:20px;">
+                That's when it hits you.<br><br>
+                <em>You've been gambling. Not trading.</em><br><br>
+                Every "signal" you followed was a black box. You never understood <strong>why</strong> to enter. Only that someone told you to.<br><br>
+                And now you're $9,652.88 poorer for it.
+            </p>
+        </div>
+    </section>
+
+    <!-- The Discovery -->
+    <section class="story-section discovery">
+        <svg class="story-svg" style="right:5%;top:15%;width:200px;" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="80" stroke="#8b5cf6" stroke-width="2" opacity="0.3"/>
+            <circle cx="100" cy="100" r="50" stroke="#8b5cf6" stroke-width="1" opacity="0.2"/>
+            <circle cx="100" cy="100" r="20" fill="#8b5cf6" opacity="0.2"/>
+            <path d="M100 60 L100 140 M60 100 L140 100" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <div class="story-content animate-on-scroll">
+            <span class="scene-indicator" style="background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.3);color:#c4b5fd;">Chapter 3 — The Discovery</span>
+            <span class="scene-emoji">🔮</span>
+            <p class="story-text">
+                Three weeks pass.<br><br>
+                You've stopped trading. Started reading. Started learning.<br><br>
+                And then, late one night, you find something <strong>different</strong>.<br><br>
+                Not another signal service. Not another black box.<br><br>
+                Something that actually <em>shows its work</em>.<br><br>
+                <strong>"What if,"</strong> you think, <strong>"I could see the reasoning behind every call?"</strong><br><br>
+                Not just "BUY NOW."<br><br>
+                But <em>why</em>. The indicators. The patterns. The math.<br><br>
+                Everything. Laid bare.
+            </p>
+        </div>
+    </section>
+
+    <!-- The Reveal -->
+    <section class="story-section reveal">
+        <svg class="story-svg" style="left:5%;bottom:20%;width:250px;" viewBox="0 0 250 200" fill="none">
+            <!-- Chart visualization -->
+            <rect x="10" y="10" width="230" height="180" rx="10" stroke="#3b82f6" stroke-width="2" fill="rgba(59,130,246,0.05)"/>
+            <line x1="30" y1="50" x2="220" y2="50" stroke="#3b82f6" stroke-width="1" opacity="0.3"/>
+            <line x1="30" y1="100" x2="220" y2="100" stroke="#3b82f6" stroke-width="1" opacity="0.3"/>
+            <line x1="30" y1="150" x2="220" y2="150" stroke="#3b82f6" stroke-width="1" opacity="0.3"/>
+            <path d="M40 130 L80 100 L120 120 L160 70 L200 50" stroke="#10b981" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <rect x="140" y="30" width="70" height="30" rx="5" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="1"/>
+            <text x="175" y="50" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">SUPPORT</text>
+        </svg>
+
+        <div class="story-content animate-on-scroll">
+            <span class="scene-indicator" style="background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.3);color:#93c5fd;">Chapter 4 — The Breakthrough</span>
+            <span class="scene-emoji">💡</span>
+            <p class="story-text">
+                For the first time...<br><br>
+                <strong>The chart talks back.</strong><br><br>
+                You upload a screenshot. Just a regular TradingView chart.<br><br>
+                And in <strong>30 seconds</strong>, something magical happens.<br><br>
+                Annotations appear. Support levels are drawn. Resistance zones are marked.<br><br>
+                But that's not the best part.<br><br>
+                <em>It explains everything.</em><br><br>
+                <span class="highlight">"RSI at 28 — oversold. Bullish divergence detected. Support at 1.0850 holds strong. Volume spike of +42% confirms momentum shift."</span><br><br>
+                Not a green arrow. Not a vague "confidence score."<br><br>
+                <strong>The actual reasoning. Every piece of it.</strong>
+            </p>
+        </div>
+    </section>
+
+    <!-- The Payoff -->
+    <section class="story-section payoff">
+        <svg class="story-svg" style="right:5%;top:10%;width:200px;" viewBox="0 0 200 200" fill="none">
+            <path d="M30 170 L70 140 L110 110 L150 60 L180 30" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="180" cy="30" r="8" fill="#10b981"/>
+            <path d="M165 25 L180 10 L195 25" stroke="#10b981" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+
+        <div class="story-content animate-on-scroll">
+            <span class="scene-indicator" style="background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.3);color:#6ee7b7;">Chapter 5 — The Transformation</span>
+            <span class="scene-emoji">🚀</span>
+            <p class="story-text">
+                <strong>Three months later.</strong><br><br>
+                You're not the same trader.<br><br>
+                Every day, you upload charts. You read the analysis. You <em>understand</em> it.<br><br>
+                And slowly, something shifts. You start seeing the patterns yourself. You start predicting what the AI will say before it says it.<br><br>
+                You're not just following signals anymore.<br><br>
+                <strong>You're becoming a real trader.</strong><br><br>
+                And the numbers? They speak for themselves.
+            </p>
+
+            <div class="profit-number animate-on-scroll animate-delay-2">+$47,283</div>
+
+            <p class="story-text story-text-small" style="margin-top:20px;">
+                That's not a typo. That's not a "best case scenario."<br><br>
+                That's what happens when you trade with <strong>understanding</strong> instead of hope.<br><br>
+                When the chart finally <em>talks back</em>.
+            </p>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-section">
+        <div class="section-container">
+            <h2 class="section-title">Marcus Isn't Alone</h2>
+            <p class="section-subtitle">Thousands of traders have made the same transformation. Here are just a few.</p>
+
+            <div class="social-grid">
+                <div class="social-card animate-on-scroll">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626);">AK</div>
+                    <div class="social-info">
+                        <h4>Alex K.</h4>
+                        <p>Forex • 2 years</p>
+                    </div>
+                    <div class="social-result">+$12.4K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-1">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">SR</div>
+                    <div class="social-info">
+                        <h4>Sarah R.</h4>
+                        <p>Crypto • 1 year</p>
+                    </div>
+                    <div class="social-result">+$8.7K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-2">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">JT</div>
+                    <div class="social-info">
+                        <h4>James T.</h4>
+                        <p>Stocks • 5 years</p>
+                    </div>
+                    <div class="social-result">+$31.2K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-3">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">ML</div>
+                    <div class="social-info">
+                        <h4>Maria L.</h4>
+                        <p>Indices • 3 years</p>
+                    </div>
+                    <div class="social-result">+$19.8K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-4">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">DW</div>
+                    <div class="social-info">
+                        <h4>David W.</h4>
+                        <p>Commodities • 4 years</p>
+                    </div>
+                    <div class="social-result">+$24.1K</div>
+                </div>
+                <div class="social-card animate-on-scroll">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);">EP</div>
+                    <div class="social-info">
+                        <h4>Emma P.</h4>
+                        <p>Forex • 6 months</p>
+                    </div>
+                    <div class="social-result">+$5.3K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-1">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">RC</div>
+                    <div class="social-info">
+                        <h4>Robert C.</h4>
+                        <p>Crypto • 2 years</p>
+                    </div>
+                    <div class="social-result">+$42.7K</div>
+                </div>
+                <div class="social-card animate-on-scroll animate-delay-2">
+                    <div class="social-avatar" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">NK</div>
+                    <div class="social-info">
+                        <h4>Nina K.</h4>
+                        <p>Stocks • 1 year</p>
+                    </div>
+                    <div class="social-result">+$15.9K</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Founder Pricing -->
+            <div class="reveal" style="margin-top:30px;">
+                <h3 style="text-align:center; font-size:1.3rem; color:#e879f9; margin-bottom:16px;">⬡ Everything Marcus Got</h3>
+                <div class="hex-grid">
+                    <div class="hex" style="background:linear-gradient(135deg,#1e40af,#3b82f6);"><div class="hex-icon">📊</div><div class="hex-title">Chart Vision</div><div class="hex-sub">See what AI sees</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#065f46,#22c55e);"><div class="hex-icon">🎯</div><div class="hex-title">87% Hits</div><div class="hex-sub">Verified wins</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#7c2d12,#f97316);"><div class="hex-icon">⚡</div><div class="hex-title">30 Sec</div><div class="hex-sub">Full analysis</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#581c87,#a855f7);"><div class="hex-icon">👁️</div><div class="hex-title">Full Reasoning</div><div class="hex-sub">No black boxes</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#1e3a5f,#06b6d4);"><div class="hex-icon">🔔</div><div class="hex-title">24/7 Watch</div><div class="hex-sub">Never sleep on trades</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#7f1d1d,#ef4444);"><div class="hex-icon">🛡️</div><div class="hex-title">Risk Control</div><div class="hex-sub">Auto stop-loss</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#365314,#84cc16);"><div class="hex-icon">🎓</div><div class="hex-title">Learn</div><div class="hex-sub">Grow every day</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#134e4a,#2dd4bf);"><div class="hex-icon">🌍</div><div class="hex-title">All Markets</div><div class="hex-sub">Forex, crypto, stocks</div></div>
+                    <div class="hex" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6);"><div class="hex-icon">🤖</div><div class="hex-title">AI Engine</div><div class="hex-sub">Vision-to-Code</div></div>
+                </div>
+            </div>
+    <section class="pricing-section">
+        <div class="section-container">
+    <!-- The Numbers -->
+    <section style="padding:30px 20px; background:linear-gradient(135deg,#1a0a2e,#16213e);" class="reveal">
+        <div style="max-width:800px; margin:0 auto;">
+            <h2 style="text-align:center; font-size:1.8rem; margin-bottom:5px; color:#e879f9;">The Numbers That Changed Everything</h2>
+            <p style="text-align:center; color:#9ca3af; margin-bottom:24px; font-size:0.95rem;">After Marcus discovered Decyphers, these weren't just numbers — they were freedom.</p>
+            <div style="display:grid; gap:16px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#22c55e; font-size:1.2rem;">87%</div><div style="font-size:0.75rem; color:#9ca3af;">Win Rate</div></div>
+                    <div style="flex:1; background:rgba(34,197,94,0.15); border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="87%" style="background:linear-gradient(90deg,#22c55e,#4ade80); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#3b82f6; font-size:1.2rem;">30 sec</div><div style="font-size:0.75rem; color:#9ca3af;">Analysis Time</div></div>
+                    <div style="flex:1; background:rgba(59,130,246,0.15); border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="95%" style="background:linear-gradient(90deg,#3b82f6,#60a5fa); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#f59e0b; font-size:1.2rem;">24/7</div><div style="font-size:0.75rem; color:#9ca3af;">Market Coverage</div></div>
+                    <div style="flex:1; background:rgba(245,158,11,0.15); border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="100%" style="background:linear-gradient(90deg,#f59e0b,#fbbf24); border-radius:10px; height:100%;"></div></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="min-width:100px; text-align:right;"><div style="font-weight:700; color:#e879f9; font-size:1.2rem;">$47K</div><div style="font-size:0.75rem; color:#9ca3af;">Marcus's 3-Month Profit</div></div>
+                    <div style="flex:1; background:rgba(232,121,249,0.15); border-radius:10px; height:14px; overflow:hidden;"><div class="progress-bar-fill" data-width="92%" style="background:linear-gradient(90deg,#e879f9,#f0abfc); border-radius:10px; height:100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+            <h2 class="section-title">Founding Member Pricing</h2>
+            <p class="section-subtitle">Lock in the lowest price before we launch publicly. This won't last.</p>
+
+            <div class="pricing-card animate-on-scroll">
+                <div class="founder-badge">Founder</div>
+                <h3>Decyphers Pro</h3>
+                <div class="pricing-original">$99/mo</div>
+                <div class="pricing-current">$49<span>/mo</span></div>
+                <div class="pricing-period">Billed monthly • Cancel anytime</div>
+
+                <ul class="pricing-features">
+                    <li><span class="pricing-check">✓</span> Unlimited chart analyses</li>
+                    <li><span class="pricing-check">✓</span> Full visual annotations</li>
+                    <li><span class="pricing-check">✓</span> Complete reasoning breakdowns</li>
+                    <li><span class="pricing-check">✓</span> All markets & timeframes</li>
+                    <li><span class="pricing-check">✓</span> Priority processing</li>
+                    <li><span class="pricing-check">✓</span> API access</li>
+                    <li><span class="pricing-check">✓</span> Private Discord community</li>
+                    <li><span class="pricing-check">✓</span> Monthly trading workshops</li>
+                </ul>
+
+                <button class="pricing-btn">
+                    🚀 Claim Your Spot
+                </button>
+
+                <p class="pricing-scarcity">
+                    <strong>Only 500 founding spots available.</strong><br>
+                    347 already taken. Price doubles at launch.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee -->
+    <section class="guarantee-section">
+        <div class="guarantee-box animate-on-scroll">
+            <div class="guarantee-shield">
+                <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5L10 25V55C10 85 28 112 50 118C72 112 90 85 90 55V25L50 5Z" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="3"/>
+                    <path d="M35 60L47 72L70 45" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2>We Risk Everything So You Risk Nothing</h2>
+            <p>
+                Try Decyphers for 30 days. If you don't see a measurable improvement in your trading — if you don't start understanding your charts better — we'll refund every penny.<br><br>
+                <strong style="color:#10b981;">No questions asked. No fine print. No hassle.</strong><br><br>
+                We're so confident in what we've built that we're willing to bet our revenue on your success. That's how much we believe in the "Show Your Work" philosophy.
+            </p>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="cta">
+        <div class="final-cta-content">
+            <h2>Your Charts Have a Story To Tell</h2>
+            <p>For the first time, they can finally tell you <em>everything</em>.</p>
+            <button class="final-cta-btn">
+                📊 Start Your Transformation
+            </button>
+            <p style="margin-top:20px;color:#6b7280;font-size:0.9rem;">
+                30-day money-back guarantee • No credit card required for trial
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2024 Decyphers AI. All rights reserved. | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
+        <p style="margin-top:10px;font-size:0.8rem;">Trading involves risk. Past performance doesn't guarantee future results. Decyphers is a tool, not financial advice.</p>
+    </footer>
+
+    <script>
+        // Scroll animations
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Parallax effect on scroll
+        function initParallax() {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                document.querySelectorAll('.time-stamp').forEach(el => {
+                    el.style.transform = `translate(-50%, calc(-50% + ${scrolled * 0.1}px))`;
+                });
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initScrollAnimations();
+            initParallax();
+        });
+    </script>
+<script src="animations.js"></script>
+</body>
+</html>

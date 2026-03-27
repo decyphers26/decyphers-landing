@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decyphers Landing Pages — Version Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ef4444, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-number {
+            font-size: 4rem;
+            font-weight: 900;
+            opacity: 0.1;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .card p {
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #d1d5db;
+        }
+
+        .card-v1 .card-number { color: #ef4444; }
+        .card-v1:hover { border-color: rgba(239, 68, 68, 0.4); }
+        .card-v1 .tag { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+        .card-v2 .card-number { color: #3b82f6; }
+        .card-v2:hover { border-color: rgba(59, 130, 246, 0.4); }
+        .card-v2 .tag { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+
+        .card-v3 .card-number { color: #10b981; }
+        .card-v3:hover { border-color: rgba(16, 185, 129, 0.4); }
+        .card-v3 .tag { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+        .view-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .card-v1 .view-btn { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .card-v2 .view-btn { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .card-v3 .view-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+
+        .card:hover .view-btn {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Decyphers Landing Pages v2</h1>
+        <p class="subtitle">Three premium versions. Each designed for a different persuasion strategy.</p>
+
+        <div class="cards">
+            <a href="decyphers-v1-persuasion.html" class="card card-v1">
+                <span class="card-number">V1</span>
+                <span class="card-icon">🔥</span>
+                <h2>The Persuasion Machine</h2>
+                <p>Dark theme with red/blue accents. Long-form sales copy with trader secrets tone. Interactive ROI calculator, accordion FAQ, countdown timers, and emotional pain points.</p>
+                <div class="card-tags">
+                    <span class="tag">Dark Theme</span>
+                    <span class="tag">Long-form Sales</span>
+                    <span class="tag">ROI Calculator</span>
+                    <span class="tag">SVG Illustrations</span>
+                </div>
+                <span class="view-btn">View Page →</span>
+            </a>
+
+            <a href="decyphers-v2-product.html" class="card card-v2">
+                <span class="card-number">V2</span>
+                <span class="card-icon">✨</span>
+                <h2>The Product Showcase</h2>
+                <p>Light Apple-style design. Clean product mockup with floating UI. Animated counters, trust badges, before/after split, and clean pricing cards. Confident, minimal copy.</p>
+                <div class="card-tags">
+                    <span class="tag">Light Theme</span>
+                    <span class="tag">Apple-style</span>
+                    <span class="tag">Product Demo</span>
+                    <span class="tag">Animated Counters</span>
+                </div>
+                <span class="view-btn">View Page →</span>
+            </a>
+
+            <a href="decyphers-v3-story.html" class="card card-v3">
+                <span class="card-number">V3</span>
+                <span class="card-icon">📖</span>
+                <h2>The Story Seller</h2>
+                <p>Cinematic storytelling following Marcus's journey. Color-shifting gradient sections, visual timeline, emotional narrative arc. Netflix documentary style copy.</p>
+                <div class="card-tags">
+                    <span class="tag">Story-driven</span>
+                    <span class="tag">Gradients</span>
+                    <span class="tag">Timeline</span>
+                    <span class="tag">Emotional</span>
+                </div>
+                <span class="view-btn">View Page →</span>
+            </a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-row">
+                <div class="stat">
+                    <div class="stat-number">64KB</div>
+                    <div class="stat-label">V1 File Size</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">47KB</div>
+                    <div class="stat-label">V2 File Size</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">36KB</div>
+                    <div class="stat-label">V3 File Size</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Unique Designs</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Decyphers AI Landing Pages v2 — Rebuilt with visuals, emotion, and FOMO</p>
+        </footer>
+    </div>
+</body>
+</html>
