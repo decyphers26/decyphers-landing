@@ -1,29 +1,79 @@
-// Decyphers Animation Enhancement Pack — inject into any landing page
+// Decyphers Animation Enhancement Pack v2 — Live prices + Mobile fixed
 (function(){
-// Add ticker bar at top
+// Price data with live updates
+const prices = {
+  eurusd: {base: 1.0847, change: 0.12, up: true},
+  gbpusd: {base: 1.2631, change: -0.08, up: false},
+  usdjpy: {base: 149.82, change: 0.31, up: true},
+  btcusd: {base: 67842, change: 2.4, up: true},
+  gold: {base: 2341, change: 0.8, up: true},
+  aapl: {base: 189.47, change: 1.2, up: true},
+  tsla: {base: 178.23, change: -0.7, up: false},
+  spx: {base: 5234, change: 0.4, up: true},
+  ndx: {base: 16428, change: 0.6, up: true}
+};
+
+function jitter(base, pct) {
+  return base * (1 + (Math.random() - 0.5) * pct / 100);
+}
+
+function formatPrice(val, decimals) {
+  return val.toFixed(decimals);
+}
+
+function updatePriceData() {
+  for (let key in prices) {
+    let p = prices[key];
+    let jitterPct = key === 'btcusd' ? 0.3 : 0.05;
+    let newBase = jitter(p.base, jitterPct);
+    let change = (Math.random() - 0.48) * 0.5;
+    p.up = change >= 0;
+    p.change = parseFloat(change.toFixed(2));
+    p.base = newBase;
+  }
+}
+
+function getTickerHTML() {
+  let items = [
+    {name: 'EUR/USD', val: formatPrice(prices.eurusd.base, 4), c: prices.eurusd.change, up: prices.eurusd.up},
+    {name: 'GBP/USD', val: formatPrice(prices.gbpusd.base, 4), c: prices.gbpusd.change, up: prices.gbpusd.up},
+    {name: 'USD/JPY', val: formatPrice(prices.usdjpy.base, 2), c: prices.usdjpy.change, up: prices.usdjpy.up},
+    {name: 'BTC/USD', val: formatPrice(prices.btcusd.base, 0), c: prices.btcusd.change, up: prices.btcusd.up},
+    {name: 'GOLD', val: formatPrice(prices.gold.base, 0), c: prices.gold.change, up: prices.gold.up},
+    {name: 'AAPL', val: formatPrice(prices.aapl.base, 2), c: prices.aapl.change, up: prices.aapl.up},
+    {name: 'TSLA', val: formatPrice(prices.tsla.base, 2), c: prices.tsla.change, up: prices.tsla.up},
+    {name: 'S&P 500', val: formatPrice(prices.spx.base, 0), c: prices.spx.change, up: prices.spx.up},
+    {name: 'NASDAQ', val: formatPrice(prices.ndx.base, 0), c: prices.ndx.change, up: prices.ndx.up}
+  ];
+  return items.map(i => {
+    let color = i.up ? '#22c55e' : '#ef4444';
+    let arrow = i.up ? '▲' : '▼';
+    let sign = i.up ? '+' : '';
+    return `<span style="white-space:nowrap">${i.name} <span style="color:${color}">${i.val} ${arrow} ${sign}${i.c}%</span></span>`;
+  }).join('');
+}
+
+// Create ticker
 const ticker = document.createElement('div');
-ticker.innerHTML = `<div style="position:fixed;top:0;left:0;right:0;background:rgba(13,17,23,0.95);border-bottom:1px solid #21262d;padding:6px 0;z-index:10000;overflow:hidden;backdrop-filter:blur(10px);">
-  <div style="display:flex;gap:40px;animation:tickScroll 25s linear infinite;white-space:nowrap;color:#8b949e;font-size:12px;font-family:monospace;" id="tickerContent">
-    <span>EUR/USD <span style="color:#22c55e">1.0847 ▲ +0.12%</span></span>
-    <span>GBP/USD <span style="color:#ef4444">1.2631 ▼ -0.08%</span></span>
-    <span>USD/JPY <span style="color:#22c55e">149.82 ▲ +0.31%</span></span>
-    <span>BTC/USD <span style="color:#22c55e">67,842 ▲ +2.4%</span></span>
-    <span>GOLD <span style="color:#22c55e">2,341 ▲ +0.8%</span></span>
-    <span>AAPL <span style="color:#22c55e">189.47 ▲ +1.2%</span></span>
-    <span>TSLA <span style="color:#ef4444">178.23 ▼ -0.7%</span></span>
-    <span>S&P 500 <span style="color:#22c55e">5,234 ▲ +0.4%</span></span>
-    <span>NASDAQ <span style="color:#22c55e">16,428 ▲ +0.6%</span></span>
-    <span>EUR/USD <span style="color:#22c55e">1.0847 ▲ +0.12%</span></span>
-    <span>GBP/USD <span style="color:#ef4444">1.2631 ▼ -0.08%</span></span>
-    <span>USD/JPY <span style="color:#22c55e">149.82 ▲ +0.31%</span></span>
+ticker.id = 'live-ticker';
+ticker.innerHTML = `<div style="position:fixed;top:0;left:0;right:0;background:rgba(13,17,23,0.97);border-bottom:1px solid #21262d;padding:8px 0;z-index:10000;overflow:hidden;backdrop-filter:blur(10px);">
+  <div style="display:flex;gap:30px;animation:tickScroll 30s linear infinite;white-space:nowrap;color:#8b949e;font-size:11px;font-family:'SF Mono',Monaco,Consolas,monospace;" id="tickerContent">
+    ${getTickerHTML()}
   </div>
 </div>`;
 document.body.prepend(ticker);
 
+// Update prices every 3 seconds
+setInterval(() => {
+  updatePriceData();
+  const el = document.getElementById('tickerContent');
+  if (el) el.innerHTML = getTickerHTML();
+}, 3000);
+
 // Add scroll progress bar
 const progressBar = document.createElement('div');
 progressBar.id = 'scrollProgress';
-progressBar.style.cssText = 'position:fixed;top:34px;left:0;height:3px;background:linear-gradient(90deg,#FF6B35,#FFD700,#22c55e);z-index:9999;width:0%;transition:width 0.1s;box-shadow:0 0 10px rgba(255,107,53,0.5);';
+progressBar.style.cssText = 'position:fixed;top:37px;left:0;height:3px;background:linear-gradient(90deg,#FF6B35,#FFD700,#22c55e);z-index:9999;width:0%;transition:width 0.1s;box-shadow:0 0 10px rgba(255,107,53,0.5);';
 document.body.prepend(progressBar);
 
 window.addEventListener('scroll',function(){
@@ -42,13 +92,10 @@ style.textContent = `
 @keyframes glowBlue { 0%,100%{box-shadow:0 0 10px rgba(59,130,246,0.3)} 50%{box-shadow:0 0 30px rgba(59,130,246,0.8),0 0 60px rgba(59,130,246,0.3)} }
 @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
 @keyframes countUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 @keyframes slideInLeft { from{opacity:0;transform:translateX(-40px)} to{opacity:1;transform:translateX(0)} }
 @keyframes slideInRight { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
 @keyframes fadeInUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-@keyframes drawLine { from{stroke-dashoffset:1000} to{stroke-dashoffset:0} }
-@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
 .reveal { opacity:0; transform:translateY(30px); transition:all 0.7s cubic-bezier(0.4,0,0.2,1); }
 .reveal.visible { opacity:1; transform:translateY(0); }
@@ -81,15 +128,45 @@ style.textContent = `
 .hex .hex-title { font-size:0.85rem; font-weight:700; }
 .hex .hex-sub { font-size:0.7rem; opacity:0.8; margin-top:3px; }
 
-body { padding-top:38px !important; }
-
+/* MOBILE FIXES */
 @media(max-width:768px) {
-  .hex-grid { gap:6px; }
+  body { padding-top:45px !important; }
+  .hex-grid { gap:6px; padding:10px; }
   .hex { width:100px; height:115px; }
   .hex .hex-icon { font-size:1.4rem; }
   .hex .hex-title { font-size:0.7rem; }
   .hex .hex-sub { display:none; }
+  
+  /* Fix section spacing on mobile */
+  section, [class*="section"] { padding:20px 12px !important; margin:0 !important; }
+  
+  /* Fix heading sizes on mobile */
+  h1 { font-size:1.8rem !important; line-height:1.2 !important; }
+  h2 { font-size:1.4rem !important; }
+  h3 { font-size:1.1rem !important; }
+  
+  /* Fix cards on mobile */
+  .card-3d, [class*="card"] { margin:6px 0 !important; }
+  
+  /* Fix comparison table on mobile */
+  .comparison-table { font-size:0.75rem !important; }
+  .comparison-header, .comparison-row { grid-template-columns: 1fr 60px 60px !important; }
+  
+  /* Fix progress bars on mobile */
+  .progress-bar-bg { height:8px !important; }
+  
+  /* Ticker smaller on mobile */
+  #tickerContent { font-size:10px !important; gap:20px !important; }
 }
+
+@media(max-width:480px) {
+  h1 { font-size:1.5rem !important; }
+  .hex { width:80px; height:92px; }
+  .hex .hex-icon { font-size:1.1rem; }
+  #tickerContent { font-size:9px !important; gap:15px !important; }
+}
+
+body { padding-top:45px; }
 `;
 document.head.appendChild(style);
 
@@ -138,40 +215,18 @@ const countObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.5 });
 
-// Stagger children animation
-const staggerObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if(e.isIntersecting) {
-      const children = e.target.querySelectorAll('.stagger-child');
-      children.forEach((c, i) => {
-        setTimeout(() => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; }, i * 100);
-      });
-      staggerObserver.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.2 });
-
 // Initialize observers after DOM ready
 setTimeout(() => {
-  // Auto-add reveal class to common elements
   document.querySelectorAll('h2, h3, .section-title, [class*="feature"], [class*="card"], [class*="testimonial"], [class*="pricing"]').forEach(el => {
     if(!el.classList.contains('reveal') && !el.closest('.reveal')) {
       el.classList.add('reveal');
     }
   });
   
-  // Observe all reveal elements
   document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => revealObserver.observe(el));
-  
-  // Observe progress bar sections
   document.querySelectorAll('[class*="progress-section"], .progress-bars-container').forEach(el => barObserver.observe(el));
-  
-  // Observe count-up elements
   document.querySelectorAll('.count-up').forEach(el => countObserver.observe(el));
-  
-  // Observe stagger containers
-  document.querySelectorAll('.stagger-container').forEach(el => staggerObserver.observe(el));
 }, 100);
 
-console.log('🎨 Decyphers Animation Pack loaded!');
+console.log('🎨 Decyphers Animation Pack v2 loaded — LIVE prices + mobile fixed!');
 })();
